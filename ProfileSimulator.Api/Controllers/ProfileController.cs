@@ -8,6 +8,13 @@ namespace ProfileSimulator.Api.Controllers
     [Route("[controller]")]
     public class ProfileController : ControllerBase
     {
+        private IConfiguration _configuration;
+
+        public ProfileController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
@@ -83,7 +90,8 @@ namespace ProfileSimulator.Api.Controllers
             }
 
             var webClient = new HttpClient();
-            webClient.DefaultRequestHeaders.Add("Authorization", "Bearer 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");
+            var openAiApiKey = _configuration.GetValue<string>("OpenAiApiKey");
+            webClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + openAiApiKey);
             var genderText = gender == 0 ? "male" : "female";
             var profileImageGenerationPrompt = $"{age} year old {genderText} person face or selfie smiling photo";
             var requestParams = new { prompt = profileImageGenerationPrompt, n = 1, size = "256x256" };
