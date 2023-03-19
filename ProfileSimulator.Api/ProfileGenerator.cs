@@ -28,8 +28,7 @@ namespace ProfileSimulator.Api
             _dataGenerator = new PersonDataGenerator(_profile);
 
             _dataGenerator.PickAGender();
-            _dataGenerator.PickAFirstName();
-            _dataGenerator.PickALastName();
+            _dataGenerator.PickAFullName();
             _dataGenerator.PickADateOfBirth();
             _dataGenerator.PickAnEmail();
             GenerateTheOcupation();

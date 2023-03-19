@@ -42,6 +42,12 @@ namespace ProfileSimulator.Api
             _profile.LastName = _possibleLastNames.PickARandomItem();
         }
 
+        public void PickAFullName()
+        {
+            PickAFirstName();
+            PickALastName();
+        }
+
         public void PickADateOfBirth()
         {
             var today = DateTime.Today;
