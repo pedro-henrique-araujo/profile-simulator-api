@@ -8,8 +8,9 @@ namespace ProfileSimulator.Api
     {
         private string _openAiApiKey;
         private Profile _profile;
+        private PersonDataGenerator? _dataGenerator;
         private Random _random;
-        private Dictionary<string, string[]> _names;
+        private Dictionary<string, string[]>? _names;
         private int _age;
 
         public ProfileGenerator(string openAiApiKey)
@@ -18,16 +19,19 @@ namespace ProfileSimulator.Api
             _random = new();
             var namesAsJson = File.ReadAllText("names.json");
             _names = JsonSerializer.Deserialize<Dictionary<string, string[]>>(namesAsJson);
+            _profile = new();
         }
 
         public async Task<Profile> GenerateProfile()
         {
             InitializeANewProfile();
-            GenerateGender();
-            GenerateTheFirstName();
-            GenerateTheLastName();
-            GenerateTheDateOfBirth();
-            GenerateEmail();
+            _dataGenerator = new PersonDataGenerator(_profile);
+
+            _dataGenerator.PickAGender();
+            _dataGenerator.PickAFirstName();
+            _dataGenerator.PickALastName();
+            _dataGenerator.PickADateOfBirth();
+            _dataGenerator.PickAnEmail();
             GenerateTheOcupation();
             await GenerateTheProfileImage();
 
@@ -37,17 +41,7 @@ namespace ProfileSimulator.Api
         private void InitializeANewProfile()
         {
             _profile = new();
-        }
-
-        private void GenerateGender()
-        {
-            _profile.Gender = _random.Next(2);
-        }
-
-        private void GenerateEmail()
-        {
-            _profile.Email = _profile.LastName.ToLower() + '.' + _profile.FirstName.ToLower() + "@fmail.com";
-        }
+        }       
 
         private async Task GenerateTheProfileImage()
         {
@@ -71,33 +65,9 @@ namespace ProfileSimulator.Api
             }
         }
 
-        private void GenerateTheDateOfBirth()
-        {
-            _age = _random.Next(70);
-            var yearOfBirth = DateTime.Today.Year - _age - 1;
-            var monthOfBirth = _random.Next(12) + 1;
-            var dayOfBirth = _random.Next(DateTime.DaysInMonth(yearOfBirth, monthOfBirth)) + 1;
-            _profile.DateOfBirth = new DateTime(yearOfBirth, monthOfBirth, dayOfBirth);
-        }
-
-        private void GenerateTheLastName()
-        {
-            var possibleLastNamesKey = "last_names";
-            var possibleLastNames = _names[possibleLastNamesKey];
-            var lastNameKey = _random.Next(possibleLastNames.Length);
-            _profile.LastName = possibleLastNames[lastNameKey];
-        }
-
-        private void GenerateTheFirstName()
-        {
-            var possibleFirstNamesKey = _profile.Gender == 0 ? "male_names" : "female_names";
-            var possibleFirstNames = _names[possibleFirstNamesKey];
-            var firstNameKey = _random.Next(possibleFirstNames.Length);
-            _profile.FirstName = possibleFirstNames[firstNameKey];
-        }
-
         private void GenerateTheOcupation()
         {
+            _age = _dataGenerator.GetAge();
             if (_age < 4)
             {
                 _profile.Occupation = "Toddler";
